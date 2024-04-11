@@ -1,7 +1,10 @@
 from django.db import connection
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView
-from .models import Library, Member, Book, Author, Genre, BookCopy, MemberBookCopy, BookList
+#from .models import Library, Member, Book, Author, Genre, BookCopy, MemberBookCopy, BookList
+from .initialize_db import startup
+
+startup()
 
 #Views which return JSON-formatted data from DB using custom SQL queries
 #Currently just a template - NOT functioning as we want them to
