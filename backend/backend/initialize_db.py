@@ -113,5 +113,3 @@ def startup():
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             INNER JOIN Library lb ON bc.LibraryID = lb.LibraryID
                             GROUP BY b.BookID, b.Title, b.Description, lb.LibraryID;""")
-
-startup()
