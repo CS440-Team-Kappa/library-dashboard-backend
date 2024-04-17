@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.generic import ListView, DetailView
 #from .models import Library, Member, Book, Author, Genre, BookCopy, MemberBookCopy, BookList
 from .initialize_db import startup
+import json
 
 startup()
 
@@ -127,6 +128,21 @@ class BookListDetailView(DetailView):
             cursor.execute("SELECT * FROM booklist WHERE BookListID = %s", [booklist_id])
             booklist = dictfetchone(cursor)
         return JsonResponse(booklist, safe=False)
+
+class BookDetailsDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        book_id = self.kwargs['pk']
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM bookdetails WHERE BookID = %s", [book_id])
+        #if valid response, convert stringified JSON into JSON
+        if bookdetails:
+            for book in bookdetails:
+                if 'Copies' in book and isinstance(book['Copies'], str):
+                    try:
+                        book['Copies'] = json.loads(book['Copies'])
+                    except json.JSONDecodeError:
+                        book['Copies'] = []
+        return JsonResponse(bookdetails, safe=False)
 
 #Fetch all rows from cursor as dictionary
 def dictfetchall(cursor):
