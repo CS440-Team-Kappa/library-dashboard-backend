@@ -134,6 +134,7 @@ class BookDetailsDetailView(DetailView):
         book_id = self.kwargs['pk']
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM bookdetails WHERE BookID = %s", [book_id])
+            bookdetails = dictfetchall(cursor)
         #if valid response, convert stringified JSON into JSON
         if bookdetails:
             for book in bookdetails:
