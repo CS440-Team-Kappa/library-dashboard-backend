@@ -3,3 +3,4 @@ INSERT INTO Library VALUES (1, "1549 University Ave, Morgantown, WV 26506", "WVU
 INSERT INTO Author VALUES (1, "J.K.", "Rowling", NULL);
 INSERT INTO BookAuthor VALUES (1, 1);
 INSERT INTO BookCopy VALUES (1, 1, 1, "New");
+INSERT INTO BookCopy VALUES(2, 1, 1, "Tarnished");
