@@ -96,7 +96,7 @@ def startup():
                             );""")
         cursor.execute("""CREATE OR REPLACE VIEW BookList AS
                             SELECT b.BookID, b.Title,
-                            GROUP_CONCAT(CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
+                            GROUP_CONCAT(DISTINCT CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
                             (SELECT COUNT(*) 
                                     FROM BookCopy bc 
                                     WHERE bc.BookID = b.BookID 
