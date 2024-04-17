@@ -95,7 +95,7 @@ def startup():
                                 ON DELETE CASCADE
                             );""")
         cursor.execute("""CREATE OR REPLACE VIEW BookList AS
-                            SELECT b.BookID, b.Title, b.Description,
+                            SELECT b.BookID, b.Title,
                                    GROUP_CONCAT(CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
                                    (SELECT COUNT(*) 
                                     FROM BookCopy bc 
@@ -112,4 +112,4 @@ def startup():
                             LEFT JOIN Author a ON ba.AuthorID = a.AuthorID
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             INNER JOIN Library lb ON bc.LibraryID = lb.LibraryID
-                            GROUP BY b.BookID, b.Title, b.Description, lb.LibraryID;""")
+                            GROUP BY b.BookID, b.Title, lb.LibraryID;""")
