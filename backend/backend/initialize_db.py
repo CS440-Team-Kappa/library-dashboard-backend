@@ -94,19 +94,27 @@ def startup():
                                 ON UPDATE CASCADE
                                 ON DELETE CASCADE
                             );""")
+        cursor.execute("""CREATE FUNCTION IF NOT EXISTS count_available_copies(bookID INT, libraryID INT)
+                            RETURNS INT
+                            READS SQL DATA
+                            BEGIN
+                                DECLARE book_copies INT;
+                                SELECT COUNT(*) INTO book_copies
+                                FROM BookCopy bc
+                                WHERE bc.BookID = bookID
+                                    AND bc.LibraryID = libraryID
+                                    AND NOT EXISTS (
+                                        SELECT 1
+                                        FROM MemberBookCopy mbc
+                                        WHERE bc.BookCopyID = mbc.BookCopyID
+                                    );
+                                RETURN book_copies;
+                            END;""")
         cursor.execute("""CREATE OR REPLACE VIEW BookList AS
                             SELECT DISTINCT b.BookID, b.Title,
                             GROUP_CONCAT(DISTINCT CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
-                            (SELECT COUNT(*) 
-                                    FROM BookCopy bc 
-                                    WHERE bc.BookID = b.BookID 
-                                      AND bc.LibraryID = lb.LibraryID
-                                      AND NOT EXISTS (
-                                          SELECT 1
-                                          FROM MemberBookCopy mbc
-                                          WHERE mbc.BookCopyID = bc.BookCopyID
-                                      )
-                            ) AS CopiesAvailable
+                            count_available_copies(b.BookID, lb.LibraryID) AS CopiesAvailable,
+                            lb.LibraryID
                             FROM Book b
                             LEFT JOIN BookAuthor ba ON b.BookID = ba.BookID
                             LEFT JOIN Author a ON ba.AuthorID = a.AuthorID
@@ -129,5 +137,5 @@ def startup():
                             INNER JOIN Author a ON ba.AuthorID = a.AuthorID
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             LEFT JOIN MemberBookCopy mbc ON bc.BookCopyID = mbc.BookCopyID
-                            GROUP BY b.BookID;""")
+                            GROUP BY b.BookID""")
 

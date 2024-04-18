@@ -116,8 +116,30 @@ class MemberBookCopyDetailView(DetailView):
 
 class BookListListView(ListView):
     def get(self, request, *args, **kwargs):
+        query = "SELECT DISTINCT * FROM booklist"
+        query_data = []
+
+        #Get libraryID from URL parameters and add to query, if present
+        library_id = self.kwargs.get('libID')
+        if library_id is not None:
+            query += " WHERE LibraryID = %s"
+            query_data.append(library_id)
+
+        #Get search string
+        search_string = request.GET.get('searchString')
+
+        #Find results with Title or Author like search_string, if present
+        if search_string:
+            if 'WHERE' in query:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " (Authors LIKE %s or Title LIKE %s)"
+            query_data.append(f"%{search_string}%")
+            query_data.append(f"%{search_string}%")
+
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM booklist")
+            cursor.execute(query, query_data)
             booklists = dictfetchall(cursor)
         return JsonResponse(booklists, safe=False)
 
