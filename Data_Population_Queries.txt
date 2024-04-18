@@ -1,6 +1,13 @@
-INSERT INTO Book VALUES(1, "isbn1", "Harry Potter and the Sorcerer's Stone", "Desc...");
+USE library;
 INSERT INTO Library VALUES (1, "1549 University Ave, Morgantown, WV 26506", "WVU Downtown Library");
+INSERT INTO Genre VALUES (0, "Non-fiction"), (1, "Fantasy"), (2, "Science Fiction"), (3, "Dystopian"), (4, "Action"), (5, "Adventure"), (6, "Mystery"), (7, "Thriller"), (8, "Romance"), (9, "Horror"), (10, "Young Adult"), (11, "Children's Fiction"), (12, "Women's Fiction"), (13, "Contemporary Fiction"), (14, "Literary Fiction"), (15, "Graphic Novel"), (16, "Short Story"), (17, "History"), (18, "Biography"), (19, "Memoir"), (20, "Poetry"), (21, "Self-Help"), (22, "True Crime"), (23, "Travel"), (24, "Art"), (25, "Science"), (26, "Photography");
+
+
 INSERT INTO Author VALUES (1, "J.K.", "Rowling", NULL);
+INSERT INTO Book VALUES(1, "978-0590353427", "Harry Potter and the Sorcerer's Stone", "Desc...");
 INSERT INTO BookAuthor VALUES (1, 1);
 INSERT INTO BookCopy VALUES (1, 1, 1, "New");
 INSERT INTO BookCopy VALUES(2, 1, 1, "Tarnished");
+INSERT INTO Book VALUES(2, "978-1338878936", "Harry Potter and the Chamber of Secrets", "Description...");
+INSERT INTO BookAuthor VALUES (1, 2);
+INSERT INTO BookCopy VALUES(3, 1, 2, "New");

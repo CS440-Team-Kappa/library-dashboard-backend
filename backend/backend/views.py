@@ -121,13 +121,6 @@ class BookListListView(ListView):
             booklists = dictfetchall(cursor)
         return JsonResponse(booklists, safe=False)
 
-class BookListDetailView(DetailView):
-    def get(self, request, *args, **kwargs):
-        booklist_id = self.kwargs['pk']
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM booklist WHERE BookListID = %s", [booklist_id])
-            booklist = dictfetchone(cursor)
-        return JsonResponse(booklist, safe=False)
 
 class BookDetailsDetailView(DetailView):
     def get(self, request, *args, **kwargs):
