@@ -12,7 +12,7 @@ startup()
 class LibraryListView(ListView):
     def get(self, request, *args, **kwargs):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM library")
+            cursor.execute("SELECT LibraryID, LibraryName FROM library")
             libraries = dictfetchall(cursor)
         return JsonResponse(libraries, safe=False)
 
@@ -142,6 +142,19 @@ class BookListListView(ListView):
             cursor.execute(query, query_data)
             booklists = dictfetchall(cursor)
         return JsonResponse(booklists, safe=False)
+
+class BookListAggregateListView(ListView):
+    def get(self, request, *args, **kwargs):
+        query = "CALL get_libraries_book_list(%s)"
+        library_ids = request.GET.getlist('LibraryID')
+        if not library_ids:
+            return JsonResponse([], safe=False)
+        library_ids_str = ','.join(library_ids)
+        
+        with connection.cursor() as cursor:
+            cursor.execute(query, [library_ids_str])
+            result = dictfetchall(cursor)
+        return JsonResponse(result, safe=False)
 
 
 class BookDetailsDetailView(DetailView):

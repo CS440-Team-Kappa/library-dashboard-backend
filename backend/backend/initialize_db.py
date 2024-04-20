@@ -120,7 +120,7 @@ def startup():
                             LEFT JOIN Author a ON ba.AuthorID = a.AuthorID
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             INNER JOIN Library lb ON bc.LibraryID = lb.LibraryID
-                            GROUP BY b.BookID, b.Title, lb.LibraryID;""")
+                            GROUP BY b.BookID, b.Title, lb.LibraryID;"""    )
         cursor.execute("""CREATE OR REPLACE VIEW BookDetails AS 
 	                        SELECT b.BookID, b.Title, b.Description, b.ISBN,
                             GROUP_CONCAT(DISTINCT CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
@@ -138,4 +138,19 @@ def startup():
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             LEFT JOIN MemberBookCopy mbc ON bc.BookCopyID = mbc.BookCopyID
                             GROUP BY b.BookID""")
+        cursor.execute("""CREATE PROCEDURE IF NOT EXISTS get_libraries_book_list(IN LibraryIDs VARCHAR(256))
+                            BEGIN
+                                SET @query = CONCAT('
+                                    SELECT 
+                                        BookID,
+                                        Title,
+                                        Authors,
+                                        SUM(CopiesAvailable) AS CopiesAvailable
+                                    FROM BookList
+                                    WHERE LibraryID IN (', LibraryIDs, ')
+                                    GROUP BY BookID, Authors');
+                                PREPARE stmt FROM @query;
+                                EXECUTE stmt;
+                                DEALLOCATE PREPARE stmt;
+                            END""")
 
