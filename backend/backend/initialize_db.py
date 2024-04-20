@@ -112,7 +112,13 @@ def startup():
                             END;""")
         cursor.execute("""CREATE OR REPLACE VIEW BookList AS
                             SELECT DISTINCT b.BookID, b.Title,
-                            GROUP_CONCAT(DISTINCT CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
+                            GROUP_CONCAT(DISTINCT CONCAT(
+                                a.FirstName,
+                                CASE WHEN a.MiddleName <> '' THEN CONCAT(' ', a.MiddleName) ELSE '' END,
+                                ' ',
+                                a.LastName
+                            ) SEPARATOR ', '
+                        ) AS Authors,
                             count_available_copies(b.BookID, lb.LibraryID) AS CopiesAvailable,
                             lb.LibraryID
                             FROM Book b
