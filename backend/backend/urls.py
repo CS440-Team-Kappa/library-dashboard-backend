@@ -36,7 +36,5 @@ urlpatterns = [
     path('memberbookcopies/', views.MemberBookCopyListView.as_view(), name='memberbookcopy-list'),
     path('memberbookcopies/<int:pk>/', views.MemberBookCopyDetailView.as_view(), name='memberbookcopy-detail'),
     path('booklists/', views.BookListListView.as_view(), name='booklist-list'),
-    path('booklists/<int:libID>/', views.BookListListView.as_view(), name='booklist-list'),
-    path('booklistsagg/', views.BookListAggregateListView.as_view(), name='booklistagg-list'),
     path('bookdetails/<int:pk>/', views.BookDetailsDetailView.as_view(), name='bookdetails-detail')
 ]

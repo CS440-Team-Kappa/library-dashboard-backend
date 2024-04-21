@@ -116,15 +116,16 @@ class MemberBookCopyDetailView(DetailView):
 
 class BookListListView(ListView):
     def get(self, request, *args, **kwargs):
-        query = "SELECT DISTINCT * FROM booklist"
+        query = "SELECT BookID, Title, Authors, SUM(CopiesAvailable) AS CopiesAvailable From BookList"
         query_data = []
-
-        #Get libraryID from URL parameters and add to query, if present
-        library_id = self.kwargs.get('libID')
-        if library_id is not None:
-            query += " WHERE LibraryID = %s"
-            query_data.append(library_id)
-
+        #Get LibraryID(s) from URL parameters and add to query, if present
+        library_ids = request.GET.getlist('LibraryID')
+        if library_ids:
+           query += " WHERE LibraryID IN (%s)" % ', '.join(['%s'] * len(library_ids))
+           query_data.extend(library_ids)
+        else:
+            #No library selected, don't query DB
+            return JsonResponse([], safe=False)
         #Get search string
         search_string = request.GET.get('searchString')
 
@@ -137,24 +138,11 @@ class BookListListView(ListView):
             query += " (Authors LIKE %s or Title LIKE %s)"
             query_data.append(f"%{search_string}%")
             query_data.append(f"%{search_string}%")
-
+        query += " GROUP BY BookID, Authors"
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
             booklists = dictfetchall(cursor)
         return JsonResponse(booklists, safe=False)
-
-class BookListAggregateListView(ListView):
-    def get(self, request, *args, **kwargs):
-        query = "CALL get_libraries_book_list(%s)"
-        library_ids = request.GET.getlist('LibraryID')
-        if not library_ids:
-            return JsonResponse([], safe=False)
-        library_ids_str = ','.join(library_ids)
-        
-        with connection.cursor() as cursor:
-            cursor.execute(query, [library_ids_str])
-            result = dictfetchall(cursor)
-        return JsonResponse(result, safe=False)
 
 
 class BookDetailsDetailView(DetailView):
