@@ -153,21 +153,40 @@ class BookListListView(ListView):
         return JsonResponse(booklists, safe=False)
 
 
-class BookDetailsDetailView(DetailView):
+class BookDetailDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         book_id = self.kwargs['pk']
+        query = "SELECT * FROM bookdetail WHERE BookID = %s"
+        query_data = [book_id]
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM bookdetails WHERE BookID = %s", [book_id])
-            bookdetails = dictfetchall(cursor)
-        #if valid response, convert stringified JSON into JSON
-        if bookdetails:
-            for book in bookdetails:
-                if 'Copies' in book and isinstance(book['Copies'], str):
-                    try:
-                        book['Copies'] = json.loads(book['Copies'])
-                    except json.JSONDecodeError:
-                        book['Copies'] = []
+            cursor.execute(query, query_data)
+            bookdetails = dictfetchone(cursor)
         return JsonResponse(bookdetails, safe=False)
+
+class BookCopyDetailListView(ListView):
+    def get(self, request, *args, **kwargs):
+        query = "SELECT * FROM bookcopydetail"
+        query_data = []
+        #Get LibraryID(s) from URL parameters and add to query, if present
+        library_ids = request.GET.getlist('LibraryID')
+        if library_ids:
+           query += " WHERE LibraryID IN (%s)" % ', '.join(['%s'] * len(library_ids))
+           query_data.extend(library_ids)
+        #Get BookID from URL parameters and add to query, if present
+        book_id = request.GET.getlist('BookID')
+        if book_id:
+            if 'WHERE' in query:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " BookID = %s"
+            query_data.append(book_id)
+        with connection.cursor() as cursor:
+            cursor.execute(query, query_data)
+            bookcopydetails = dictfetchall(cursor)
+        return JsonResponse(bookcopydetails, safe=False)
+
+            
 
 #Fetch all rows from cursor as dictionary
 def dictfetchall(cursor):

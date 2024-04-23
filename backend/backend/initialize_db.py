@@ -126,22 +126,19 @@ def startup():
                             LEFT JOIN Author a ON ba.AuthorID = a.AuthorID
                             INNER JOIN BookCopy bc ON b.BookID = bc.BookID
                             INNER JOIN Library lb ON bc.LibraryID = lb.LibraryID
-                            GROUP BY b.BookID, b.Title, lb.LibraryID;"""    )
-        cursor.execute("""CREATE OR REPLACE VIEW BookDetails AS 
-	                        SELECT b.BookID, b.Title, b.Description, b.ISBN,
-                            GROUP_CONCAT(DISTINCT CONCAT(a.FirstName, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors,
-                            JSON_ARRAYAGG(
-                                JSON_OBJECT(
-                                    'BookCopyID', bc.BookCopyID, 
-                                    'LibraryID', bc.LibraryID, 
-                                    'BookCondition', bc.BookCondition, 
-                                    'CheckedOut', CASE WHEN mbc.MemberID IS NOT NULL THEN 'Checked Out' ELSE 'Available' END
-                                )
-                            ) AS Copies
+                            GROUP BY b.BookID, b.Title, lb.LibraryID;""")
+        cursor.execute("""CREATE OR REPLACE VIEW bookdetail AS
+                            SELECT b.BookID, b.Title, b.Description, b.ISBN,
+                            GROUP_CONCAT(DISTINCT CONCAT(a.Firstname, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors
                             FROM Book b
                             INNER JOIN BookAuthor ba ON b.BookID = ba.bookID
                             INNER JOIN Author a ON ba.AuthorID = a.AuthorID
-                            INNER JOIN BookCopy bc ON b.BookID = bc.BookID
-                            LEFT JOIN MemberBookCopy mbc ON bc.BookCopyID = mbc.BookCopyID
-                            GROUP BY b.BookID""")
+                            GROUP BY b.BookID;""")
+        cursor.execute("""CREATE OR REPLACE VIEW bookcopydetail AS
+                            SELECT bc.BookCopyID, bc.LibraryID, bc.BookCondition,
+                            CASE WHEN mbc.MemberID IS NOT NULL THEN 'Checked Out' ELSE 'Available' END AS CheckedOut,
+                            b.BookID
+                            FROM BookCopy bc
+                            LEFT JOIN MemberBookCopy mbc ON mbc.BookCopyID = bc.BookCopyID
+                            JOIN Book b ON b.BookID = bc.BookID;""")
 
