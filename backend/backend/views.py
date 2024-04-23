@@ -102,12 +102,12 @@ class BookCopyDetailView(DetailView):
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
         query = "SELECT mbc.BookCopyID, Title, DueDate FROM MemberBookCopy mbc"
-        query += "JOIN BookCopy bc ON bc.BookCopyID = mbc.BookCopyID"
-        query += "JOIN Book b ON bc.BookID = b.BookID"
+        query += " JOIN BookCopy bc ON bc.BookCopyID = mbc.BookCopyID"
+        query += " JOIN Book b ON bc.BookID = b.BookID"
         query_data = []
-        member_id = self.GET.get('MemberID')
+        member_id = request.GET.get('MemberID')
         if member_id:
-            query += "WHERE mbc.MemberID = %s"
+            query += " WHERE mbc.MemberID = %s"
             query_data.append(member_id)
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
