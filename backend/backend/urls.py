@@ -37,5 +37,6 @@ urlpatterns = [
     path('memberbookcopies/<int:pk>/', views.MemberBookCopyDetailView.as_view(), name='memberbookcopy-detail'),
     path('booklists/', views.BookListListView.as_view(), name='booklist-list'),
     path('bookdetail/<int:pk>/', views.BookDetailDetailView.as_view(), name='bookdetail-detail'),
-    path('bookcopydetail/', views.BookCopyDetailListView.as_view(), name='bookcopydetail-list')
+    path('bookcopydetail/', views.BookCopyDetailListView.as_view(), name='bookcopydetail-list'),
+    path('insertbook/', views.InsertBookDetailView.as_view(), name='insertbook-detail')
 ]

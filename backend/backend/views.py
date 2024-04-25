@@ -186,6 +186,39 @@ class BookCopyDetailListView(ListView):
             bookcopydetails = dictfetchall(cursor)
         return JsonResponse(bookcopydetails, safe=False)
 
+class InsertBookDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        return JsonResponse("", safe=False)
+    def post(self, request, *args, **kwargs):
+        book_id = request.POST.get('BookID')
+        book_condition = request.POST.get('BookCondition')
+        library_id = request.POST.get('LibraryID')
+        if not book_id:
+            #Insert book and fetch ID
+            book_title = request.POST.get('Title')
+            book_desc = request.POST.get('Description')
+            book_isbn = request.POST.get('isbn')
+            book_query = "INSERT INTO Book (Title, ISBN, Description) VALUES %s, %s, %s"
+            book_query_data = [book_title, book_isbn, book_desc]
+            with connection.cursor() as cursor:
+                cursor.execute(book_query, book_query_data)
+                response = dictfetchone(cursor)
+                book_id = response.get('BookID')
+            #Check if authors already exist in DB
+
+            #Insert authors and fetch IDs
+            book_authors = request.POST.getlist('Author')
+            author_query = "INSERT INTO Author (FirstName, LastName, MiddleName) VALUES %s, %s, %s"
+        copy_query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
+        copy_query_data = [library_id, book_id, book_condition]
+        with connection.cursor() as cursor:
+            cursor.execute(copy_query, copy_query_data)
+            response = dictfetchone(cursor)
+            return JsonResponse(response, safe=False)
+               
+                
+
+
             
 
 #Fetch all rows from cursor as dictionary
