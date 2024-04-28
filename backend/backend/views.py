@@ -55,19 +55,24 @@ class BookDetailView(DetailView):
         book_genre_ids = request.GET.getlist('GenreID')
         author_first_names = request.GET.getlist('AuthorFirstName')
         author_last_names = request.GET.getlist('AuthorLastName')
+        book_genre_count = 0
 
         with transaction.atomic():
             #Insert authors and book, getting IDs back
             author_ids = insert_authors(author_first_names, author_last_names)
+            if not author_ids:
+                return JsonResponse({'ResponseMessage' : "Error adding book"})
             book_id = insert_book(book_title, book_isbn, book_desc)
+            if not book_id:
+                return JsonResponse({'ResponseMessage' : "Error adding book"})
 
             #Insert into BookAuthor and BookGenre tables
-            if author_ids and book_id:
-                book_author_count = insert_book_authors(book_id, author_ids)
+            book_author_count = insert_book_authors(book_id, author_ids)
+            if book_genre_ids and book_id:
                 book_genre_count = insert_book_genres(book_id, book_genre_ids)
 
         #Ensure operation success
-        if author_ids and book_id and book_author_count and book_genre_count:
+        if book_id and (book_author_count == len(author_ids)) and (book_genre_count == len(book_genre_ids)):
             return JsonResponse({'ResponseMessage' : "Book successfully added"})
         else:
             return JsonResponse({'ResponseMessage' : "Error adding book"})
