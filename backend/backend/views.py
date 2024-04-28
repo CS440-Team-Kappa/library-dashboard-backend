@@ -251,3 +251,32 @@ def dictfetchone(cursor):
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, cursor.fetchone()))
 
+#Standalone function for insert book with authors
+def insert_book_with_authors(title, isbn, description, authors, library_id, book_condition):
+    with connection.cursor() as cursor:
+        # Insert book
+        cursor.execute("INSERT INTO Book (Title, ISBN, Description) VALUES (%s, %s, %s)", [title, isbn, description])
+        book_id = cursor.lastrowid
+
+        # Insert or retrieve author IDs
+        query_data = []
+        for i in range(0, len(authors), 3):
+            author_data = authors[i:i+3]
+            query_data.extend(author_data)
+            query = "INSERT INTO Author (FirstName, LastName, MiddleName) VALUES "
+            query += ', '.join(['(%s, %s, %s)'] * (len(author_data) // 3))
+            cursor.execute(query, query_data)
+
+        # Insert book copy
+        cursor.execute("INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES (%s, %s, %s)", [library_id, book_id, book_condition])
+
+        # Retrieve author IDs
+        author_ids = []
+        for i in range(0, len(authors), 3):
+            author_data = authors[i:i+3]
+            cursor.execute("SELECT AuthorID FROM Author WHERE FirstName = %s AND LastName = %s AND MiddleName = %s", author_data)
+            author_row = cursor.fetchone()
+            if author_row:
+                author_ids.append(author_row[0])
+
+    return {"BookID": book_id, "LibraryID": library_id, "BookCondition": book_condition, "AuthorIDs": author_ids}
