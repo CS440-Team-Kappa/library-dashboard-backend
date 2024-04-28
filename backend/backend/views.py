@@ -49,9 +49,20 @@ class BookListView(ListView):
 class BookDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         book_id = self.kwargs['pk']
+        book_title = request.POST.get('Title')
+        book_desc = request.POST.get('Description')
+        book_isbn = request.POST.get('isbn')
+        book_query = "INSERT INTO Book (Title, ISBN, Description) VALUES %s, %s, %s"
+        book_query_data = [book_title, book_isbn, book_desc]
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM book WHERE BookID = %s", [book_id])
             book = dictfetchone(cursor)
+        with connection.cursor() as cursor:
+            cursor.execute(book_query, book_query_data)
+            if cursor.rowcount > 0:
+                return JsonResponse({'ResponseMessage' : "Book copy successfully created"}, safe=False)
+            else:
+                return JsonResponse({'ResponseMessage' : "Book copy creation failed. Please try again."}, safe=False)
         return JsonResponse(book, safe=False)
 
 class AuthorListView(ListView):
@@ -98,7 +109,7 @@ class BookCopyDetailView(DetailView):
         query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
         query_data = [library_id, book_id, book_condition]
         if not library_id or not book_id or not book_condition:
-            return JsonResponse({ 'ResponseMessage': "Missing field"}, safe=False)
+            return JsonResponse({ 'ResponseMessage': "Error"}, safe=False)
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
             if cursor.rowcount > 0:
