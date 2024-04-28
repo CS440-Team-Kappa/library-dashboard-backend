@@ -2,7 +2,6 @@ from django.db import connection
 from django.db import transaction
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView
-#from .models import Library, Member, Book, Author, Genre, BookCopy, MemberBookCopy, BookList
 from .initialize_db import startup
 import json
 
@@ -228,21 +227,35 @@ def dictfetchone(cursor):
     return dict(zip(columns, cursor.fetchone()))
 
 
+def is_author_inserted(first_name, last_name):
+    query = "SELECT AuthorID FROM Author WHERE FirstName = %s AND LastName = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(query, [first_name, last_name])
+        author_id = cursor.fetchone()[0]
+        return author_id
+
 def insert_authors(first_names, last_names):
     query = "INSERT INTO Author (FirstName, LastName) VALUES"
     select_query = "SELECT AuthorID FROM Author WHERE (FirstName, LastName) IN ("
     query_data = []
+    author_ids = []
     for fname, lname in zip(first_names, last_names):
-        query += " (%s, %s), "
-        select_query += " (%s, %s), "
-        query_data.extend([fname, lname])
+        au_id = is_author_inserted(fname, lname)
+        if au_id is None:
+            query += " (%s, %s), "
+            select_query += " (%s, %s), "
+            query_data.extend([fname, lname])
+        else:
+            author_ids.append(au_id)
     query = query[:-2]  #remove last comma and space
     select_query = select_query[:-2] + ");"
-    with connection.cursor() as cursor:
-        cursor.execute(query, query_data)
-        #Fetch the inserted AuthorIDs
-        cursor.execute(select_query, query_data)
-        author_ids = [row[0] for row in cursor.fetchall()]
+    if query_data:
+        with connection.cursor() as cursor:
+            cursor.execute(query, query_data)
+            #Fetch the inserted AuthorIDs
+            cursor.execute(select_query, query_data)
+            author_ids = author_ids.extend([row[0] for row in cursor.fetchall()])
+    if author_ids:
         return author_ids
     return None
 
