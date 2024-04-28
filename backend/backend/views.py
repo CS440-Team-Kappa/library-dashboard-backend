@@ -133,7 +133,7 @@ class BookCopyDetailView(DetailView):
 
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
-        query = "SELECT mbc.BookCopyID, Title, DueDate FROM MemberBookCopy mbc"
+        query = "SELECT mbc.BookCopyID, Title, OutDate, DueDate FROM MemberBookCopy mbc"
         query += " JOIN BookCopy bc ON bc.BookCopyID = mbc.BookCopyID"
         query += " JOIN Book b ON bc.BookID = b.BookID"
         query_data = []
@@ -296,3 +296,4 @@ def insert_book_genres(book_id, genre_ids):
     with connection.cursor() as cursor:
         cursor.execute(query, query_data)
         return cursor.rowcount
+    
