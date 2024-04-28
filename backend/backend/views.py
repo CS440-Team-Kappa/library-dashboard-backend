@@ -84,21 +84,27 @@ class GenreDetailView(DetailView):
             genre = dictfetchone(cursor)
         return JsonResponse(genre, safe=False)
 
-class BookCopyListView(ListView):
-    def get(self, request, *args, **kwargs):
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM bookcopy")
-            bookcopies = dictfetchall(cursor)
-        return JsonResponse(bookcopies, safe=False)
-
 class BookCopyDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        bookcopy_id = self.kwargs['pk']
+        bookcopy_id = request.GET.get('BookCopyID')
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM bookcopy WHERE BookCopyID = %s", [bookcopy_id])
             bookcopy = dictfetchone(cursor)
         return JsonResponse(bookcopy, safe=False)
-
+    def post(self, request, *args, **kwargs):
+        library_id = request.POST.get('LibraryID')
+        book_id = request.POST.get('BookID')
+        book_condition = request.POST.get('BookCondition')
+        query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
+        query_data = [library_id, book_id, book_condition]
+        if not library_id or not book_id or not book_condition:
+            return JsonResponse({ 'ResponseMessage': "Missing field"}, safe=False)
+        with connection.cursor() as cursor:
+            cursor.execute(query, query_data)
+            if cursor.rowcount > 0:
+                return JsonResponse({'ResponseMessage' : "Book copy successfully created"}, safe=False)
+            else:
+                return JsonResponse({'ResponseMessage' : "Book copy creation failed. Please try again."}, safe=False)
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
         query = "SELECT mbc.BookCopyID, Title, DueDate FROM MemberBookCopy mbc"
