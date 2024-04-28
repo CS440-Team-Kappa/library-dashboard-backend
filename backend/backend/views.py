@@ -1,4 +1,5 @@
 from django.db import connection
+from django.db import transaction
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView
 #from .models import Library, Member, Book, Author, Genre, BookCopy, MemberBookCopy, BookList
@@ -48,22 +49,31 @@ class BookListView(ListView):
 
 class BookDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        book_id = self.kwargs['pk']
-        book_title = request.POST.get('Title')
-        book_desc = request.POST.get('Description')
-        book_isbn = request.POST.get('isbn')
-        book_query = "INSERT INTO Book (Title, ISBN, Description) VALUES %s, %s, %s"
-        book_query_data = [book_title, book_isbn, book_desc]
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM book WHERE BookID = %s", [book_id])
-            book = dictfetchone(cursor)
-        with connection.cursor() as cursor:
-            cursor.execute(book_query, book_query_data)
-            if cursor.rowcount > 0:
-                return JsonResponse({'ResponseMessage' : "Book copy successfully created"}, safe=False)
-            else:
-                return JsonResponse({'ResponseMessage' : "Book copy creation failed. Please try again."}, safe=False)
-        return JsonResponse(book, safe=False)
+        #Get data from URL params
+        book_title = request.GET.get('Title')
+        book_desc = request.GET.get('Description')
+        book_isbn = request.GET.get('ISBN')
+        book_genre_ids = request.GET.getlist('GenreID')
+        author_first_names = request.GET.getlist('AuthorFirstName')
+        author_last_names = request.GET.getlist('AuthorLastName')
+
+        with transaction.atomic():
+            #Insert authors and book, getting IDs back
+            author_ids = insert_authors(author_first_names, author_last_names)
+            book_id = insert_book(book_title, book_isbn, book_desc)
+
+            #Insert into BookAuthor and BookGenre tables
+            if author_ids and book_id:
+                book_author_count = insert_book_authors(book_id, author_ids)
+                book_genre_count = insert_book_genres(book_id, book_genre_ids)
+
+        #Ensure operation success
+        if author_ids and book_id and book_author_count and book_genre_count:
+            return JsonResponse({'ResponseMessage' : "Book successfully added"})
+        else:
+            return JsonResponse({'ResponseMessage' : "Error adding book"})
+            
+
 
 class AuthorListView(ListView):
     def get(self, request, *args, **kwargs):
@@ -109,13 +119,14 @@ class BookCopyDetailView(DetailView):
         query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
         query_data = [library_id, book_id, book_condition]
         if not library_id or not book_id or not book_condition:
-            return JsonResponse({ 'ResponseMessage': "Error"}, safe=False)
+            return JsonResponse({ 'ResponseMessage': "Error creating book copy"}, safe=False)
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
             if cursor.rowcount > 0:
                 return JsonResponse({'ResponseMessage' : "Book copy successfully created"}, safe=False)
             else:
                 return JsonResponse({'ResponseMessage' : "Book copy creation failed. Please try again."}, safe=False)
+
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
         query = "SELECT mbc.BookCopyID, Title, DueDate FROM MemberBookCopy mbc"
@@ -202,42 +213,7 @@ class BookCopyDetailListView(ListView):
             cursor.execute(query, query_data)
             bookcopydetails = dictfetchall(cursor)
         return JsonResponse(bookcopydetails, safe=False)
-
-class InsertBookDetailView(DetailView):
-    def get(self, request, *args, **kwargs):
-        return JsonResponse("", safe=False)
-    def post(self, request, *args, **kwargs):
-        book_id = request.POST.get('BookID')
-        book_condition = request.POST.get('BookCondition')
-        library_id = request.POST.get('LibraryID')
-        if not book_id:
-            #Insert book and fetch ID
-            book_title = request.POST.get('Title')
-            book_desc = request.POST.get('Description')
-            book_isbn = request.POST.get('isbn')
-            book_query = "INSERT INTO Book (Title, ISBN, Description) VALUES %s, %s, %s"
-            book_query_data = [book_title, book_isbn, book_desc]
-            with connection.cursor() as cursor:
-                cursor.execute(book_query, book_query_data)
-                response = dictfetchone(cursor)
-                book_id = response.get('BookID')
-            #Check if authors already exist in DB
-
-            #Insert authors and fetch IDs
-            book_authors = request.POST.getlist('Author')
-            author_query = "INSERT INTO Author (FirstName, LastName, MiddleName) VALUES %s, %s, %s"
-        copy_query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
-        copy_query_data = [library_id, book_id, book_condition]
-        with connection.cursor() as cursor:
-            cursor.execute(copy_query, copy_query_data)
-            response = dictfetchone(cursor)
-            return JsonResponse(response, safe=False)
                
-                
-
-
-            
-
 #Fetch all rows from cursor as dictionary
 def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
@@ -251,32 +227,50 @@ def dictfetchone(cursor):
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, cursor.fetchone()))
 
-#Standalone function for insert book with authors
-def insert_book_with_authors(title, isbn, description, authors, library_id, book_condition):
+
+def insert_authors(first_names, last_names):
+    query = "INSERT INTO Author (FirstName, LastName) VALUES"
+    select_query = "SELECT AuthorID FROM Author WHERE (FirstName, LastName) IN ("
+    query_data = []
+    for fname, lname in zip(first_names, last_names):
+        query += " (%s, %s), "
+        select_query += " (%s, %s), "
+        query_data.extend([fname, lname])
+    query = query[:-2]  #remove last comma and space
+    select_query = select_query[:-2] + ");"
     with connection.cursor() as cursor:
-        # Insert book
-        cursor.execute("INSERT INTO Book (Title, ISBN, Description) VALUES (%s, %s, %s)", [title, isbn, description])
+        cursor.execute(query, query_data)
+        #Fetch the inserted AuthorIDs
+        cursor.execute(select_query, query_data)
+        author_ids = [row[0] for row in cursor.fetchall()]
+        return author_ids
+    return None
+
+def insert_book(title, isbn, desc):
+    query = "INSERT INTO Book (Title, ISBN, Description) VALUES (%s, %s, %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(query, [title, isbn, desc])
         book_id = cursor.lastrowid
+    return book_id
 
-        # Insert or retrieve author IDs
-        query_data = []
-        for i in range(0, len(authors), 3):
-            author_data = authors[i:i+3]
-            query_data.extend(author_data)
-            query = "INSERT INTO Author (FirstName, LastName, MiddleName) VALUES "
-            query += ', '.join(['(%s, %s, %s)'] * (len(author_data) // 3))
-            cursor.execute(query, query_data)
+def insert_book_authors(book_id, author_ids):
+    query = "INSERT INTO BookAuthor (AuthorID, BookID) VALUES"
+    query_data = []
+    for a in author_ids:
+        query += " (%s, %s), "
+        query_data.extend([a, book_id])
+    query = query[:-2] #Remove last comma and space
+    with connection.cursor() as cursor:
+        cursor.execute(query, query_data)
+        return cursor.rowcount
 
-        # Insert book copy
-        cursor.execute("INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES (%s, %s, %s)", [library_id, book_id, book_condition])
-
-        # Retrieve author IDs
-        author_ids = []
-        for i in range(0, len(authors), 3):
-            author_data = authors[i:i+3]
-            cursor.execute("SELECT AuthorID FROM Author WHERE FirstName = %s AND LastName = %s AND MiddleName = %s", author_data)
-            author_row = cursor.fetchone()
-            if author_row:
-                author_ids.append(author_row[0])
-
-    return {"BookID": book_id, "LibraryID": library_id, "BookCondition": book_condition, "AuthorIDs": author_ids}
+def insert_book_genres(book_id, genre_ids):
+    query = "INSERT INTO BookGenre (BookID, GenreID) VALUES"
+    query_data = []
+    for g in genre_ids:
+        query += " (%s, %s), "
+        query_data.extend([book_id, g])
+    query = query[:-2]
+    with connection.cursor() as cursor:
+        cursor.execute(query, query_data)
+        return cursor.rowcount
