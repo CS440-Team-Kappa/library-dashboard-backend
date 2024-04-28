@@ -135,10 +135,11 @@ def startup():
                             INNER JOIN Author a ON ba.AuthorID = a.AuthorID
                             GROUP BY b.BookID;""")
         cursor.execute("""CREATE OR REPLACE VIEW bookcopydetail AS
-                            SELECT bc.BookCopyID, bc.LibraryID, bc.BookCondition,
+                            SELECT bc.BookCopyID, bc.LibraryID, bc.BookCondition, l.LibraryName,
                             CASE WHEN mbc.MemberID IS NOT NULL THEN 'Checked Out' ELSE 'Available' END AS CheckedOut,
                             b.BookID
                             FROM BookCopy bc
                             LEFT JOIN MemberBookCopy mbc ON mbc.BookCopyID = bc.BookCopyID
-                            JOIN Book b ON b.BookID = bc.BookID;""")
+                            JOIN Book b ON b.BookID = bc.BookID
+                            JOIN Library l ON bc.LibraryID = l.LibraryID;""")
 
