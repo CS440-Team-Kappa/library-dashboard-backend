@@ -231,8 +231,11 @@ def is_author_inserted(first_name, last_name):
     query = "SELECT AuthorID FROM Author WHERE FirstName = %s AND LastName = %s"
     with connection.cursor() as cursor:
         cursor.execute(query, [first_name, last_name])
-        author_id = cursor.fetchone()[0]
-        return author_id
+        author_id = cursor.fetchone()
+        if author_id is not None:
+            return author_id[0]
+        else:
+            return None
 
 def insert_authors(first_names, last_names):
     query = "INSERT INTO Author (FirstName, LastName) VALUES"
@@ -254,7 +257,8 @@ def insert_authors(first_names, last_names):
             cursor.execute(query, query_data)
             #Fetch the inserted AuthorIDs
             cursor.execute(select_query, query_data)
-            author_ids = author_ids.extend([row[0] for row in cursor.fetchall()])
+            fetched_ids = [row[0] for row in cursor.fetchall()]
+            author_ids.extend(fetched_ids)
     if author_ids:
         return author_ids
     return None
