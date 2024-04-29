@@ -10,6 +10,7 @@ def startup():
         cursor.execute("""CREATE TABLE IF NOT EXISTS Member(
                             MemberID INT UNSIGNED UNIQUE NOT NULL PRIMARY KEY AUTO_INCREMENT,
                             Email VARCHAR(256) UNIQUE NOT NULL,
+                            Password VARCHAR(256) NOT NULL,
                             FirstName VARCHAR(256) NOT NULL,
                             LastName VARCHAR(256) NOT NULL,
                             PhoneNumber VARCHAR(12)

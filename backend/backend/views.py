@@ -30,14 +30,25 @@ class MemberListView(ListView):
             cursor.execute("SELECT * FROM member")
             members = dictfetchall(cursor)
         return JsonResponse(members, safe=False)
-
+    
 class MemberDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        member_id = self.kwargs['pk']
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM member WHERE MemberID = %s", [member_id])
-            member = dictfetchone(cursor)
-        return JsonResponse(member, safe=False)
+        email = request.GET.get('email')
+        password = request.GET.get('password')
+        firstName = request.GET.get('firstName')
+        lastName = request.GET.get('lastName')
+        phoneNumber = request.GET.get('phoneNumber')
+        query = "INSERT INTO MEMBER (Email, Password, FirstName, LastName, PhoneNumber) VALUES (%s, %s, %s, %s, %s)"
+        query_data = [email, password, firstName, lastName, phoneNumber]
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(query, query_data)
+                if cursor.rowcount > 0:
+                    return JsonResponse({'ResponseMessage' : "User created successfully created"}, safe=False)
+                else:
+                    return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
+
+   
 
 class BookListView(ListView):
     def get(self, request, *args, **kwargs):
