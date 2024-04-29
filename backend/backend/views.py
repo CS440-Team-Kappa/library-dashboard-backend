@@ -45,7 +45,7 @@ class MemberDetailView(DetailView):
             with connection.cursor() as cursor:
                 cursor.execute(query, query_data)
             with connection.cursor() as cursor:
-                cursor.execute(query, [email])
+                cursor.execute(query2, [email])
                 user = dictfetchone(cursor)
                 return JsonResponse(user, safe=False)
 
