@@ -11,3 +11,40 @@ INSERT INTO BookCopy VALUES(2, 1, 1, "Tarnished");
 INSERT INTO Book VALUES(2, "978-1338878936", "Harry Potter and the Chamber of Secrets", "Description...");
 INSERT INTO BookAuthor VALUES (1, 2);
 INSERT INTO BookCopy VALUES(3, 1, 2, "New");
+
+INSERT INTO Author VALUES (3, "Ray", "Bradbury");
+INSERT INTO Book VALUES (3, "978-3060311354", "Fahrenheit 451", "Desc...");
+INSERT INTO Book VALUES (4, "978-0062079930", "The Martian Chronicles", "Desc...");
+INSERT INTO Book VALUES (5, "978-0789156327", "A Sound of Thunder", "Desc...");
+INSERT INTO BookAuthor VALUES (3, 3);
+INSERT INTO BookAuthor VALUES (3, 4);
+INSERT INTO BookAuthor VALUES (3, 5);
+
+INSERT INTO Author VALUES (4, "William", "Golding");
+INSERT INTO Book VALUES (6, "978-1573226127", "Lord of the Flies", "Desc...");
+INSERT INTO Book VALUES (7, "978-0226629490", "Rites of Passage", "Desc...");
+INSERT INTO Book VALUES (8, "978-0571093304", "The Spire", "Desc...");
+INSERT INTO Book VALUES (9, "978-0099285571", "Darkness Visible", "Desc...");
+INSERT INTO BookAuthor VALUES (4, 6);
+INSERT INTO BookAuthor VALUES (4, 7);
+INSERT INTO BookAuthor VALUES (4, 8);
+INSERT INTO BookAuthor VALUES (4, 9);
+
+INSERT INTO Author VALUES (5, "Rick", "Riordan");
+INSERT INTO Book VALUES (10, "978-1423121701", "The Lightning Thief", "Desc...");
+INSERT INTO Book VALUES (11, "978-0141319148", "The Sea of Monsters", "Desc...");
+INSERT INTO Book VALUES (12, "978-0141346816", "The Titan's Curse", "Desc...");
+INSERT INTO BookAuthor VALUES (5, 10);
+INSERT INTO BookAuthor VALUES (5, 11);
+INSERT INTO BookAuthor VALUES (5, 12);
+
+INSERT INTO Author VALUES (6, "Suzanne", "Collins");
+INSERT INTO Book VALUES (13, "978-1407132082", "The Hunger Games", "Desc...");
+INSERT INTO Book VALUES (14, "978-1338321951", "Catching Fire", "Desc...");
+INSERT INTO Book VALUES (15, "978-0439023542", "Mockingjay", "Desc...");
+INSERT INTO BookAuthor VALUES (6, 13);
+INSERT INTO BookAuthor VALUES (6, 14);
+INSERT INTO BookAuthor VALUES (6, 15);
+
+
+
