@@ -48,6 +48,19 @@ class MemberDetailView(DetailView):
                 else:
                     return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
 
+class MemberLoginView(DetailView):
+    def get(self, request, *args, **kwargs):
+        email = request.GET.get('email')
+        query = "SELECT * FROM MEMBER WHERE Email = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(query, [email])
+            user = dictfetchone(cursor)
+            if user:
+                return JsonResponse(user, safe=False)
+            else:
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+
    
 
 class BookListView(ListView):
