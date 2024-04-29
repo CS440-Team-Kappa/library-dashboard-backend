@@ -40,13 +40,14 @@ class MemberDetailView(DetailView):
         phoneNumber = request.GET.get('phoneNumber')
         query = "INSERT INTO MEMBER (Email, Password, FirstName, LastName, PhoneNumber) VALUES (%s, %s, %s, %s, %s)"
         query_data = [email, password, firstName, lastName, phoneNumber]
+        query2 = "SELECT * FROM MEMBER WHERE Email = %s"
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(query, query_data)
-                if cursor.rowcount > 0:
-                    return JsonResponse({'ResponseMessage' : "User created successfully created"}, safe=False)
-                else:
-                    return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
+            with connection.cursor() as cursor:
+                cursor.execute(query, [email])
+                user = dictfetchone(cursor)
+                return JsonResponse(user, safe=False)
 
 class MemberLoginView(DetailView):
     def get(self, request, *args, **kwargs):
@@ -59,6 +60,20 @@ class MemberLoginView(DetailView):
                 return JsonResponse(user, safe=False)
             else:
                 return JsonResponse({'error': 'User not found'}, status=404)
+            
+class MemberLibraryView(DetailView):
+    def get(self, request, *args, **kwargs):
+        member_id = request.GET.get('MemberID')
+        query = "INSERT INTO LibraryMember (LibraryID, MemberID) VALUES (%s, %s)"
+        query_data = [1, member_id]
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(query, query_data)
+                if cursor.rowcount > 0:
+                    return JsonResponse({'ResponseMessage' : "User created successfully created"}, safe=False)
+                else:
+                    return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
+
 
 
    
