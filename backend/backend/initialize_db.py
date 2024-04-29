@@ -143,4 +143,21 @@ def startup():
                             LEFT JOIN MemberBookCopy mbc ON mbc.BookCopyID = bc.BookCopyID
                             JOIN Book b ON b.BookID = bc.BookID
                             JOIN Library l ON bc.LibraryID = l.LibraryID;""")
+        cursor.execute("""INSERT INTO Member (Email, Password, FirstName, LastName, PhoneNumber)
+                          SELECT 'root@admin', 'password', 'Root', 'Admin', '8000000000'
+                          WHERE NOT EXISTS (
+                          SELECT 1 
+                          FROM Member 
+                          WHERE Email = 'root@admin'
+                          );""")
+        cursor.execute("""INSERT INTO Employee (MemberID, SSN, Address, Role)
+                          SELECT MemberID, '000000000', '12345 Wells St', 'Admin'
+                          FROM Member
+                          WHERE Email = 'root@admin'
+                          AND NOT EXISTS (
+                          SELECT 1 
+                          FROM Employee 
+                          WHERE SSN = '000000000'
+                          );""")
+        
 
