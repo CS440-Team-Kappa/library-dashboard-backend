@@ -13,6 +13,15 @@ INSERT INTO BookCopy VALUES (1, 1, 1, "New");
 INSERT INTO BookCopy VALUES (2, 1, 1, "Tarnished");
 INSERT INTO Book VALUES(2, "978-1338878936", "Harry Potter and the Chamber of Secrets", "Description...");
 INSERT INTO member VALUES (1, "skylerputney04@gmail.com", "b04run", "Skyler", "Putney", 3046579880);
+INSERT INTO member VALUES (2, "michaeldolan07@yahoo.com", "h3art06g", "Michael", "Dolan", 3042895006);
+INSERT INTO member VALUES (3, "taylordomingues@hotmail.com", "fl0erew98", "Taylor", "Domingues", 3046509903);
+INSERT INTO member VALUES (4, "kennyclark@hotmail.com", "ov3rr@n04", "Kenny", "Clark", 3041210998);
+INSERT INTO member VALUES (5, "ethanwright01@mail.com", "port3r04", "Ethan", "Wright", 3042886509);
+INSERT INTO member VALUES (6, "georgeretina05@yahoo.com", "funY04a", "George", "Retina", 3182009496);
+INSERT INTO member VALUES (7, "sarahhilret03@gmail.com", "pow3r0n", "Sarah", "Hilret", 3044890498);
+INSERT INTO member VALUES (8, "josephjorge07@yahoo.com", "bask3tb0ll", "Joseph", "Jorge", 3185530873);
+INSERT INTO employee VALUES (3, 098345098, "5000 Ball St Morgantown WV", "Cashier");
+INSERT INTO employee VALUES (7, 110956489, "438 Sickle St Bellefonte PA", "Shelf stocker");
 INSERT INTO BookAuthor VALUES (1, 2);
 INSERT INTO BookCopy VALUES(3, 1, 2, "New");
 
