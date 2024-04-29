@@ -223,12 +223,31 @@ class BookListListView(ListView):
 
 class BookDetailDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        book_id = self.kwargs['pk']
-        query = "SELECT * FROM bookdetail WHERE BookID = %s"
-        query_data = [book_id]
+        #Get BookID from URL params, adding to query if present
+        book_id = request.GET.get('BookID')
+        query = "SELECT * FROM bookdetail"
+        query_data = []
+        if book_id:
+            query += " WHERE BookID = %s"
+            query_data.append(book_id)
+
+        #Get search string
+        search_string = request.GET.get('searchString')
+
+        #Find results with Title like search_string, if present
+        if search_string:
+            if 'WHERE' in query:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " (Title LIKE %s)"
+            query_data.append(f"%{search_string}%")
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
-            bookdetails = dictfetchone(cursor)
+            if book_id:
+                bookdetails = dictfetchone(cursor)
+            else:
+                bookdetails = dictfetchall(cursor)
         return JsonResponse(bookdetails, safe=False)
 
 class BookCopyDetailListView(ListView):
@@ -306,10 +325,23 @@ def insert_authors(first_names, last_names):
 
 def insert_book(title, isbn, desc):
     query = "INSERT INTO Book (Title, ISBN, Description) VALUES (%s, %s, %s)"
+    book_id = is_book_inserted(title, isbn)
+    if book_id:
+        return book_id
     with connection.cursor() as cursor:
         cursor.execute(query, [title, isbn, desc])
         book_id = cursor.lastrowid
     return book_id
+
+def is_book_inserted(title, isbn):
+    query = "SELECT BookID FROM Book WHERE Title = %s AND ISBN = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(query, [title, isbn])
+        book_id = cursor.fetchone()
+        if book_id is not None:
+            return book_id[0]
+        else:
+            return None
 
 def insert_book_authors(book_id, author_ids):
     query = "INSERT INTO BookAuthor (AuthorID, BookID) VALUES"
