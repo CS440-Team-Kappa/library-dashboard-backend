@@ -57,6 +57,7 @@ class BookListView(ListView):
             books = dictfetchall(cursor)
         return JsonResponse(books, safe=False)
 
+#Used for Book and BookCopy Insertion with appropriate Author/Genre insertions
 class BookDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         #Get data from URL params
@@ -66,6 +67,8 @@ class BookDetailView(DetailView):
         book_genre_ids = request.GET.getlist('GenreID')
         author_first_names = request.GET.getlist('AuthorFirstName')
         author_last_names = request.GET.getlist('AuthorLastName')
+        book_condition = request.GET.get('BookCondition')
+        library_id = request.GET.get('LibraryID')
         book_genre_count = 0
 
         with transaction.atomic():
@@ -84,9 +87,10 @@ class BookDetailView(DetailView):
 
         #Ensure operation success
         if book_id and (book_author_count == len(author_ids)) and (book_genre_count == len(book_genre_ids)):
-            return JsonResponse({'ResponseMessage' : "Book successfully added"})
-        else:
-            return JsonResponse({'ResponseMessage' : "Error adding book"})
+            book_copy_insert = insert_book_copy(book_id, library_id, book_condition)
+            if book_copy_insert is not None:
+                return JsonResponse({'ResponseMessage' : "Book successfully added"})
+        return JsonResponse({'ResponseMessage' : "Error adding book"})
             
 
 
@@ -307,4 +311,12 @@ def insert_book_genres(book_id, genre_ids):
     with connection.cursor() as cursor:
         cursor.execute(query, query_data)
         return cursor.rowcount
-    
+
+def insert_book_copy(book_id, lib_id, condition):
+    query = "INSERT INTO BookCopy (BookID, LibraryID, BookCondition) VALUES (%s, %s, %s)"
+    if book_id and lib_id and condition:
+        with connection.cursor() as cursor:
+            cursor.execute(query, [book_id, lib_id, condition])
+            return cursor.rowcount
+    return None
+
