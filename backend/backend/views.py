@@ -127,15 +127,17 @@ class GenreDetailView(DetailView):
 class BookCopyDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         book_copy_ids = request.GET.getlist('BookCopyID')
-        query = "SELECT BookCopyID, LibraryID, LibraryName, BookID, BookCondition, Title FROM BookCopy JOIN Book ON BookCopy.BookID = Book.BookID JOIN Library ON BookCopy.LibraryID = Library.LibraryID"
+        query = "SELECT BookCopyID, Library.LibraryID, LibraryName, BookCopy.BookID, BookCondition, Title FROM BookCopy JOIN Book ON BookCopy.BookID = Book.BookID JOIN Library ON BookCopy.LibraryID = Library.LibraryID"
         query_data = []
         if book_copy_ids:
             query += " WHERE BookCopyID IN (%s)" % ', '.join(['%s'] * len(book_copy_ids))
             query_data.extend(book_copy_ids)
-        with connection.cursor() as cursor:
-            cursor.execute(query, query_data)
-            book_copies = dictfetchall(cursor)
-        return JsonResponse(book_copies, safe=False)
+            with connection.cursor() as cursor:
+                cursor.execute(query, query_data)
+                book_copies = dictfetchall(cursor)
+            return JsonResponse(book_copies, safe=False)
+        else:
+            return JsonResponse([], safe=False)
 
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
