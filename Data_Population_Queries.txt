@@ -12,6 +12,7 @@ INSERT INTO BookAuthor VALUES (1, 1);
 INSERT INTO BookCopy VALUES (1, 1, 1, "New");
 INSERT INTO BookCopy VALUES (2, 1, 1, "Tarnished");
 INSERT INTO Book VALUES(2, "978-1338878936", "Harry Potter and the Chamber of Secrets", "Description...");
+INSERT INTO member VALUES (1, "skylerputney04@gmail.com", "b04run", "Skyler", "Putney", 3046579880);
 INSERT INTO BookAuthor VALUES (1, 2);
 INSERT INTO BookCopy VALUES(3, 1, 2, "New");
 
