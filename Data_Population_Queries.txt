@@ -1,9 +1,10 @@
-book copy Id (will increment by 1 each time), library id, book id, book condition
-
 USE library;
 INSERT INTO Library VALUES (1, "1549 University Ave, Morgantown, WV 26506", "WVU Downtown Library");
+INSERT INTO Library VALUES (2, "109 Research Way, Morgantown, WV 26505", "WVU Evansdale Library");
+INSERT INTO Library VALUES (3, "127 East 58th Street, New York, NY 10022", "The New York Public Library");
+INSERT INTO Library VALUES (4, "100 Wood St, California, PA 15419", "California Public Library");
+INSERT INTO Library VALUES (5, "100 N School St. Bellefonte, PA 16823", "Centre County Library");
 INSERT INTO Genre VALUES (0, "Non-fiction"), (1, "Fantasy"), (2, "Science Fiction"), (3, "Dystopian"), (4, "Action"), (5, "Adventure"), (6, "Mystery"), (7, "Thriller"), (8, "Romance"), (9, "Horror"), (10, "Young Adult"), (11, "Children's Fiction"), (12, "Women's Fiction"), (13, "Contemporary Fiction"), (14, "Literary Fiction"), (15, "Graphic Novel"), (16, "Short Story"), (17, "History"), (18, "Biography"), (19, "Memoir"), (20, "Poetry"), (21, "Self-Help"), (22, "True Crime"), (23, "Travel"), (24, "Art"), (25, "Science"), (26, "Photography");
-
 
 INSERT INTO Author VALUES (1, "J.K.", "Rowling", NULL);
 INSERT INTO Book VALUES(1, "978-0590353427", "Harry Potter and the Sorcerer's Stone", "Desc...");
@@ -18,7 +19,7 @@ INSERT INTO Author VALUES (3, "Ray", "Bradbury", NULL);
 INSERT INTO Book VALUES (3, "978-3060311354", "Fahrenheit 451", "Desc...");
 INSERT INTO Book VALUES (4, "978-0062079930", "The Martian Chronicles", "Desc...");
 INSERT INTO Book VALUES (5, "978-0789156327", "A Sound of Thunder", "Desc...");
-INSERT INTO BookCopy VALUES (4, 2, 3, "Tarnished");
+INSERT INTO BookCopy VALUES (4, 1, 3, "Tarnished");
 INSERT INTO BookCopy VALUES (5, 1, 4, "New");
 INSERT INTO BookCopy VALUES (6, 2, 4, "Tarnished");
 INSERT INTO BookAuthor VALUES (3, 3);
