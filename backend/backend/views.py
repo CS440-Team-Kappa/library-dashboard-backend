@@ -126,25 +126,16 @@ class GenreDetailView(DetailView):
 
 class BookCopyDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        bookcopy_id = request.GET.get('BookCopyID')
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM bookcopy WHERE BookCopyID = %s", [bookcopy_id])
-            bookcopy = dictfetchone(cursor)
-        return JsonResponse(bookcopy, safe=False)
-    def post(self, request, *args, **kwargs):
-        library_id = request.POST.get('LibraryID')
-        book_id = request.POST.get('BookID')
-        book_condition = request.POST.get('BookCondition')
-        query = "INSERT INTO BookCopy (LibraryID, BookID, BookCondition) VALUES %s, %s, %s"
-        query_data = [library_id, book_id, book_condition]
-        if not library_id or not book_id or not book_condition:
-            return JsonResponse({ 'ResponseMessage': "Error creating book copy"}, safe=False)
+        book_copy_ids = request.GET.getlist('BookCopyID')
+        query = "SELECT BookCopyID, LibraryID, LibraryName, BookID, BookCondition, Title FROM BookCopy JOIN Book ON BookCopy.BookID = Book.BookID JOIN Library ON BookCopy.LibraryID = Library.LibraryID"
+        query_data = []
+        if book_copy_ids:
+            query += " WHERE BookCopyID IN (%s)" % ', '.join(['%s'] * len(book_copy_ids))
+            query_data.extend(book_copy_ids)
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
-            if cursor.rowcount > 0:
-                return JsonResponse({'ResponseMessage' : "Book copy successfully created"}, safe=False)
-            else:
-                return JsonResponse({'ResponseMessage' : "Book copy creation failed. Please try again."}, safe=False)
+            book_copies = dictfetchall(cursor)
+        return JsonResponse(book_copies, safe=False)
 
 class MemberBookCopyListView(ListView):
     def get(self, request, *args, **kwargs):
