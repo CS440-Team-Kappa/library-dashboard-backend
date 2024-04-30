@@ -165,5 +165,13 @@ def startup():
                           FROM Employee 
                           WHERE SSN = '000000000'
                           );""")
-        
+        cursor.execute("""INSERT INTO LibraryMember (LibraryID, MemberID)
+                          SELECT '1', MemberID
+                          FROM Member
+                          WHERE Email = 'root@admin'
+                          AND NOT EXISTS (
+                          SELECT 1 
+                          FROM LibraryMember 
+                          WHERE LibraryMember.MemberID = Member.MemberID
+                          );""")
 
