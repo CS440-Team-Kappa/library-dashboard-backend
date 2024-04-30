@@ -292,7 +292,7 @@ def is_author_inserted(first_name, last_name):
     with connection.cursor() as cursor:
         cursor.execute(query, [first_name, last_name])
         author_id = cursor.fetchone()
-        if author_id is not None:
+        if author_id:
             return author_id[0]
         else:
             return None
@@ -310,9 +310,9 @@ def insert_authors(first_names, last_names):
             query_data.extend([fname, lname])
         else:
             author_ids.append(au_id)
-    query = query[:-2]  #remove last comma and space
-    select_query = select_query[:-2] + ");"
     if query_data:
+        query = query[:-2]  #remove last comma and space
+        select_query = select_query[:-2] + ");"
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
             #Fetch the inserted AuthorIDs
@@ -343,16 +343,32 @@ def is_book_inserted(title, isbn):
         else:
             return None
 
+def is_book_author_inserted(book_id, author_id):
+    query = "SELECT AuthorID FROM BookAuthor WHERE BookID = %s AND AuthorID = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(query, [book_id, author_id])
+        author_id = cursor.fetchone()
+        if author_id is not None:
+            return author_id[0]
+        else:
+            return None
+
 def insert_book_authors(book_id, author_ids):
     query = "INSERT INTO BookAuthor (AuthorID, BookID) VALUES"
     query_data = []
+    rowcount = 0
     for a in author_ids:
-        query += " (%s, %s), "
-        query_data.extend([a, book_id])
-    query = query[:-2] #Remove last comma and space
-    with connection.cursor() as cursor:
-        cursor.execute(query, query_data)
-        return cursor.rowcount
+        if is_book_author_inserted(book_id, a) is None:
+            query += " (%s, %s), "
+            query_data.extend([a, book_id])
+        else:
+            rowcount += 1
+    if query_data:
+        query = query[:-2] #Remove last comma and space
+        with connection.cursor() as cursor:
+            cursor.execute(query, query_data)
+            return cursor.rowcount + rowcount
+    return rowcount
 
 def insert_book_genres(book_id, genre_ids):
     query = "INSERT INTO BookGenre (BookID, GenreID) VALUES"

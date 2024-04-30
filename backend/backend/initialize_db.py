@@ -118,8 +118,8 @@ def startup():
                                 CASE WHEN a.MiddleName <> '' THEN CONCAT(' ', a.MiddleName) ELSE '' END,
                                 ' ',
                                 a.LastName
-                            ) SEPARATOR ', '
-                        ) AS Authors,
+                                ) SEPARATOR ', '
+                            ) AS Authors,
                             count_available_copies(b.BookID, lb.LibraryID) AS CopiesAvailable,
                             lb.LibraryID
                             FROM Book b
@@ -130,7 +130,13 @@ def startup():
                             GROUP BY b.BookID, b.Title, lb.LibraryID;""")
         cursor.execute("""CREATE OR REPLACE VIEW bookdetail AS
                             SELECT b.BookID, b.Title, b.Description, b.ISBN,
-                            GROUP_CONCAT(DISTINCT CONCAT(a.Firstname, ' ', COALESCE(a.MiddleName, ''), ' ', a.LastName) SEPARATOR ', ') AS Authors
+                            GROUP_CONCAT(DISTINCT CONCAT(
+                                a.FirstName,
+                                CASE WHEN a.MiddleName <> '' THEN CONCAT(' ', a.MiddleName) ELSE '' END,
+                                ' ',
+                                a.LastName
+                                ) SEPARATOR ', '
+                            ) AS Authors
                             FROM Book b
                             INNER JOIN BookAuthor ba ON b.BookID = ba.bookID
                             INNER JOIN Author a ON ba.AuthorID = a.AuthorID
