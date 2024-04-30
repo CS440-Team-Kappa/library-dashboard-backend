@@ -31,6 +31,13 @@ class MemberListView(ListView):
             members = dictfetchall(cursor)
         return JsonResponse(members, safe=False)
     
+class EmployeesListView(ListView):
+    def get(self, request, *args, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM employees")
+            employees = dictfetchall(cursor)
+        return JsonResponse(employees, safe=False)
+    
 class MemberDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         email = request.GET.get('email')
@@ -73,6 +80,29 @@ class MemberLibraryView(DetailView):
                     return JsonResponse({'ResponseMessage' : "User created successfully created"}, safe=False)
                 else:
                     return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
+
+class CreateEmployeeLibraryView(DetailView):
+    def get(self, request, *arges, **kwargs):
+        memberid = request.GET.get('memberid')
+        ssn = request.GET.get('ssn')
+        address = request.GET.get('address')
+        role = request.GET.get('role')
+        query = 'INSERT INTO Employee (MemberID, SSN, Address, Role) VALUES (%s, %s, %s, %s)'
+        query_data = (memberid, ssn, address, role)
+        query2 = 'SELECT * FROM Employee where MemberID = %s'
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(query, query_data)
+        with connection.cursor() as cursor:
+            cursor.execute(query2, [memberid])
+            employee = dictfetchone(cursor)
+            if employee:
+                return JsonResponse(employee, safe=False)
+            else:
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+
+        
 
 
 
