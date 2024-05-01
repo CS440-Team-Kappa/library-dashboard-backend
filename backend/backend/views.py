@@ -11,10 +11,16 @@ startup()
 #Currently just a template - NOT functioning as we want them to
 class LibraryListView(ListView):
     def get(self, request, *args, **kwargs):
+        query = "SELECT LibraryID, LibraryName FROM Library"
+        query_data = []
+        library_ids = request.GET.getlist('LibraryID')
+        if library_ids:
+            query += " WHERE LibraryID IN (%s)" % ', '.join(['%s'] * len(library_ids))
+            query_data.extend(library_ids)
         with connection.cursor() as cursor:
-            cursor.execute("SELECT LibraryID, LibraryName FROM library")
+            cursor.execute(query, query_data)
             libraries = dictfetchall(cursor)
-        return JsonResponse(libraries, safe=False)
+            return JsonResponse(libraries, safe=False)
 
 class LibraryDetailView(DetailView):
     def get(self, request, *args, **kwargs):
@@ -205,7 +211,7 @@ class MemberBookCopyListView(ListView):
         query_data = []
         member_id = request.GET.get('MemberID')
         if member_id:
-            query += " WHERE mbc.MemberID = %s"
+            query += " WHERE mbc.MemberID = %s" 
             query_data.append(member_id)
         with connection.cursor() as cursor:
             cursor.execute(query, query_data)
