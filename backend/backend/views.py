@@ -302,6 +302,19 @@ class BookCopyDetailListView(ListView):
             cursor.execute(query, query_data)
             bookcopydetails = dictfetchall(cursor)
         return JsonResponse(bookcopydetails, safe=False)
+
+class MemberBookCopyRemoveDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        query = "DELETE FROM MemberBookCopy WHERE BookCopyID = %s AND MemberID = %s"
+        bcID = request.GET.get('BCID')
+        mID = request.GET.get('MID')
+        with connection.cursor() as cursor:
+            cursor.execute(query, [bcID, mID])
+            rowcount = cursor.rowcount
+        if rowcount > 0:
+            return JsonResponse({'ResponseMessage' : "Book checked-in successfully."})
+        else:
+            return JsonResponse({'ResponseMessage' : "Check-in failed."})
                
 #Fetch all rows from cursor as dictionary
 def dictfetchall(cursor):
