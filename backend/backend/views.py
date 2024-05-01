@@ -80,6 +80,16 @@ class MemberLibraryView(DetailView):
                     return JsonResponse({'ResponseMessage' : "User created successfully created"}, safe=False)
                 else:
                     return JsonResponse({'ResponseMessage' : "User creation failed. Please try again."}, safe=False)
+                
+class GetMemberLibraryView(DetailView):
+    def get(self, request, *args, **kwargs):
+        member_id = request.GET.get('MemberID')
+        query = "SELECT * FROM LibraryMember WHERE MemberID = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(query, [member_id])
+            libraryid = dictfetchone(cursor)
+            return JsonResponse(libraryid, safe=False)
+
 
 class CreateEmployeeLibraryView(DetailView):
     def get(self, request, *arges, **kwargs):

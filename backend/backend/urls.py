@@ -26,6 +26,7 @@ urlpatterns = [
     path('members/', views.MemberDetailView.as_view(), name='member-detail'),
     path('member-login/', views.MemberLoginView.as_view(), name='memberlogin-detail'),
     path('member-library/', views.MemberLibraryView.as_view(), name='memberlibrary-detail'),
+    path('get-member-library/', views.GetMemberLibraryView.as_view(), name='getmemberlibrary-detail'),
     path('create-employee/', views.CreateEmployeeLibraryView.as_view(), name='create-employee-detail'),
     path('employees/', views.EmployeesListView.as_view(), name='employees-detail'),
     path('books/', views.BookListView.as_view(), name='book-list'),
