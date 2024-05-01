@@ -34,7 +34,7 @@ class MemberListView(ListView):
 class EmployeesListView(ListView):
     def get(self, request, *args, **kwargs):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM employees")
+            cursor.execute("SELECT * FROM employee")
             employees = dictfetchall(cursor)
         return JsonResponse(employees, safe=False)
     
