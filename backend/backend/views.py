@@ -361,16 +361,18 @@ class DeleteBookCopyDetailView(DetailView):
 class CheckOutDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         memberid = request.GET.get('MemberID')
-        bookid = request.GET.get('BookID')
+        bookids = request.GET.getlist('BookID')
+        query_data = []
+        query_data.extend(bookid)
         query = 'INSERT INTO MemberBookCopy (MemberID, BookCopyID, OutDate, DueDate) VALUES (%s, %s, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY))'
         query2 = 'SELECT * FROM MemberBookCopy WHERE BookCopyID = %s'
-        with transaction.atomic():
-            with connection.cursor() as cursor:
+        book_info = []
+        with connection.cursor() as cursor:
+            for bookid in bookids:
                 cursor.execute(query, [memberid, bookid])
-            with connection.cursor() as cursor:
                 cursor.execute(query2, [bookid])
-                bookinfo = dictfetchone(cursor)
-            return JsonResponse(bookinfo, safe=False)
+                book_info.append(dictfetchone(cursor))
+        return JsonResponse(book_info, safe=False)
 
                
 #Fetch all rows from cursor as dictionary
