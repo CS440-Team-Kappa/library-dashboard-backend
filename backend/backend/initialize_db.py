@@ -174,7 +174,7 @@ def startup():
                           FROM LibraryMember 
                           WHERE LibraryMember.MemberID = Member.MemberID
                           );""")
-        cursor.execute("""CREATE TRIGGER delete_book_after_last_copy_deleted
+        cursor.execute("""CREATE TRIGGER IF NOT EXISTS delete_book_after_last_copy_deleted
                           AFTER DELETE ON BookCopy
                           FOR EACH ROW
                           BEGIN
