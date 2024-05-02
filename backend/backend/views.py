@@ -332,6 +332,20 @@ class MemberBookCopyRemoveDetailView(DetailView):
         else:
             return JsonResponse({'ResponseMessage' : "Check-in failed."})
 
+class UpdateBookDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        query = "UPDATE Book SET Title = %s, ISBN = %s, Description = %s WHERE ISBN = %s"
+        title = request.GET.get('Title')
+        isbn = request.GET.get('ISBN')
+        desc = request.GET.get('Description')
+        if title and isbn and desc:
+            with connection.cursor() as cursor:
+                cursor.execute(query, [title, isbn, desc, isbn])
+                if cursor.rowcount > 0:
+                    return JsonResponse({'ResponseMessage': "Book updated successfully."})
+        return JsonResposne({'ResponseMessage': "Book update failed."})
+               
+
 class CheckOutDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         memberid = request.GET.get('MemberID')
