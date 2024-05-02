@@ -344,6 +344,18 @@ class UpdateBookDetailView(DetailView):
                 if cursor.rowcount > 0:
                     return JsonResponse({'ResponseMessage': "Book updated successfully."})
         return JsonResposne({'ResponseMessage': "Book update failed."})
+
+class DeleteBookCopyDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        query = "DELETE FROM BookCopy WHERE BookCopyID = %s"
+        bcid = request.GET.get('BookCopyID')
+        if not bcid:
+           return JsonResponse({'ResponseMessage' : "Error deleting Book Copy."}, safe=False)
+        with connection.cursor() as cursor:
+            cursor.execute(query, [bcid])
+            if cursor.rowcount > 0:
+                return JsonResponse({'ResponseMessage' : "Book Copy deleted."})
+        return JsonResponse({'ResponseMessage': "Error deleting Book Copy."})
                
 
 class CheckOutDetailView(DetailView):
