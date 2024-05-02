@@ -42,5 +42,6 @@ urlpatterns = [
     path('bookdetail/', views.BookDetailDetailView.as_view(), name='bookdetail-detail'),
     path('bookcopydetail/', views.BookCopyDetailListView.as_view(), name='bookcopydetail-list'),
     path('removembc/', views.MemberBookCopyRemoveDetailView.as_view(), name='memberbookcopyremove-detail'),
-    path('updatebook/', views.UpdateBookDetailView.as_view(), name='updatebook-detail')
+    path('updatebook/', views.UpdateBookDetailView.as_view(), name='updatebook-detail'),
+    path('deletebookcopy/', views.DeleteBookCopyDetailView.as_view(), name='deletebookcopy-detail')
 ]
