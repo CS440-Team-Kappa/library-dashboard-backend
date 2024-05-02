@@ -363,7 +363,7 @@ class CheckOutDetailView(DetailView):
         memberid = request.GET.get('MemberID')
         bookid = request.GET.get('BookID')
         query = 'INSERT INTO MemberBookCopy (MemberID, BookCopyID, OutDate, DueDate) VALUES (%s, %s, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY))'
-        query2 = 'SELECT * FROM MemberBookCopy WHERE BookID = %s'
+        query2 = 'SELECT * FROM MemberBookCopy WHERE BookCopyID = %s'
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(query, [memberid, bookid])
