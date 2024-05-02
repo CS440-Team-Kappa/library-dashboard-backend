@@ -331,6 +331,21 @@ class MemberBookCopyRemoveDetailView(DetailView):
             return JsonResponse({'ResponseMessage' : "Book checked-in successfully."})
         else:
             return JsonResponse({'ResponseMessage' : "Check-in failed."})
+
+class CheckOutDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        memberid = request.GET.get('MemberID')
+        bookid = request.GET.get('BookID')
+        query = 'INSERT INTO MemberBookCopy (MemberID, BookCopyID, OutDate, DueDate) VALUES (%s, %s, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY))'
+        query2 = 'SELECT * FROM MemberBookCopy WHERE BookID = %s'
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(query, [memberid, bookid])
+            with connection.cursor() as cursor:
+                cursor.execute(query2, [bookid])
+                bookinfo = dictfetchone(cursor)
+            return JsonResponse(bookinfo, safe=False)
+
                
 #Fetch all rows from cursor as dictionary
 def dictfetchall(cursor):
@@ -447,4 +462,6 @@ def insert_book_copy(book_id, lib_id, condition):
             cursor.execute(query, [book_id, lib_id, condition])
             return cursor.rowcount
     return None
+
+
 
