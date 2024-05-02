@@ -44,5 +44,5 @@ urlpatterns = [
     path('removembc/', views.MemberBookCopyRemoveDetailView.as_view(), name='memberbookcopyremove-detail'),
     path('updatebook/', views.UpdateBookDetailView.as_view(), name='updatebook-detail'),
     path('deletebookcopy/', views.DeleteBookCopyDetailView.as_view(), name='deletebookcopy-detail'),
-    path('checkout-book', views.CheckOutDetailView.as_view(), name='checkout-book')
+    path('checkout-book/', views.CheckOutDetailView.as_view(), name='checkout-book')
 ]

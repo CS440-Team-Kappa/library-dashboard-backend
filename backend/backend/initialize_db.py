@@ -174,4 +174,21 @@ def startup():
                           FROM LibraryMember 
                           WHERE LibraryMember.MemberID = Member.MemberID
                           );""")
+        cursor.execute("""CREATE TRIGGER IF NOT EXISTS delete_book_after_last_copy_deleted
+                          AFTER DELETE ON BookCopy
+                          FOR EACH ROW
+                          BEGIN
+                          DECLARE remaining_copies INT;
+                
+                          -- Check if there are any remaining copies of the book
+                          SELECT COUNT(*) INTO remaining_copies
+                          FROM BookCopy
+                          WHERE BookID = OLD.BookID;
+                
+                          -- If no remaining copies found, delete the corresponding book
+                              IF remaining_copies = 0 THEN
+                                DELETE FROM Book WHERE BookID = OLD.BookID;
+                              END IF;
+                          END;
+        """)
 
