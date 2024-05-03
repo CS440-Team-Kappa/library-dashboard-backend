@@ -363,7 +363,7 @@ class CheckOutDetailView(DetailView):
         memberid = request.GET.get('MemberID')
         bookids = request.GET.getlist('BookID')
         query_data = []
-        query_data.extend(bookid)
+        query_data.extend(bookids)
         query = 'INSERT INTO MemberBookCopy (MemberID, BookCopyID, OutDate, DueDate) VALUES (%s, %s, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY))'
         query2 = 'SELECT * FROM MemberBookCopy WHERE BookCopyID = %s'
         book_info = []
